@@ -1,4 +1,4 @@
-use crate::error::{index_out_of_bound, jumps_limit, Result};
+use crate::errors::{index_out_of_bound, jumps_limit, label_len_limit, Result};
 
 const BUF_SIZE: usize = 512;
 
@@ -73,6 +73,9 @@ impl PacketBuffer {
         *num_jumps += 1;
         Ok(true)
     }
+
+    /// This function pushes the label (eg. www, google, com)
+    /// and the delimiter '.' into the output string named "outstr"
     fn qname_push(
         &mut self,
         outstr: &mut String,
@@ -81,12 +84,14 @@ impl PacketBuffer {
         len: u8,
     ) -> Result<()> {
         outstr.push_str(delim);
+
         let str_buf = self.get_range(*pos, len as usize)?;
         outstr.push_str(&String::from_utf8_lossy(str_buf).to_lowercase());
 
         *pos += len as usize;
         Ok(())
     }
+
     pub fn read_qname(&mut self, outstr: &mut String) -> Result<()> {
         let mut pos = self.pos();
         let mut jumped = false;
@@ -121,5 +126,41 @@ impl PacketBuffer {
         }
 
         Ok(())
+    }
+
+    pub fn write(&mut self, val: u8) -> Result<()> {
+        if self.pos >= BUF_SIZE {
+            return Err(index_out_of_bound());
+        }
+        self.buf[self.pos] = val;
+        self.pos += 1;
+        Ok(())
+    }
+
+    pub fn write_u16(&mut self, val: u16) -> Result<()> {
+        self.write(((val >> 8) & 0xFF) as u8)?;
+        self.write(((val >> 0) & 0xFF) as u8)
+    }
+
+    pub fn write_u32(&mut self, val: u32) -> Result<()> {
+        self.write(((val >> 24) & 0xFF) as u8)?;
+        self.write(((val >> 16) & 0xFF) as u8)?;
+        self.write(((val >> 8) & 0xFF) as u8)?;
+        self.write(((val >> 0) & 0xFF) as u8)
+    }
+
+    pub fn write_qname(&mut self, qname: &str) -> Result<()> {
+        for label in qname.split('.') {
+            let len = label.len();
+            if len > 0x3f {
+                return Err(label_len_limit());
+            }
+
+            self.write(len as u8)?;
+            for byte in label.as_bytes() {
+                self.write(*byte)?;
+            }
+        }
+        self.write(0)
     }
 }

@@ -1,4 +1,4 @@
-use crate::error::Result;
+use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -98,5 +98,29 @@ impl DnsHeader {
         self.resource_entries = buffer.read_u16()?;
 
         Ok(())
+    }
+
+    pub fn write(&self, buffer: &mut PacketBuffer) -> Result<()> {
+        buffer.write_u16(self.id)?;
+        buffer.write(
+            ((self.recursion_desired as u8) << 0)
+                | ((self.truncated_message as u8) << 1)
+                | ((self.authoritative_answer as u8) << 2)
+                | ((self.opcode) << 3)
+                | ((self.response as u8) << 7) as u8,
+        )?;
+
+        buffer.write(
+            (self.rescode as u8)
+                | ((self.checking_disabled as u8) << 4)
+                | ((self.authed_data as u8) << 5)
+                | ((self.z as u8) << 6)
+                | ((self.recursion_available as u8) << 7) as u8,
+        )?;
+
+        buffer.write_u16(self.questions)?;
+        buffer.write_u16(self.answers)?;
+        buffer.write_u16(self.authoritative_entries)?;
+        buffer.write_u16(self.resource_entries)
     }
 }

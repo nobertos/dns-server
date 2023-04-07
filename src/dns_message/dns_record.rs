@@ -1,6 +1,6 @@
 use std::net::Ipv4Addr;
 
-use crate::{error::Result, packet_buffer::PacketBuffer};
+use crate::{errors::Result, packet_buffer::PacketBuffer};
 
 use super::QueryType;
 

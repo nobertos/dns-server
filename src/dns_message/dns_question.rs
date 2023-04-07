@@ -1,4 +1,4 @@
-use crate::error::Result;
+use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 
 use super::QueryType;

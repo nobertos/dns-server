@@ -25,7 +25,7 @@ impl Into<u16> for QueryType {
     }
 }
 
-use crate::error::Result;
+use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 
 use self::dns_header::DnsHeader;

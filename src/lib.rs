@@ -1,3 +1,3 @@
 pub mod dns_message;
-pub mod error;
+pub mod errors;
 pub mod packet_buffer;

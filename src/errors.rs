@@ -8,3 +8,7 @@ pub fn index_out_of_bound() -> Error {
 pub fn jumps_limit(limit: u8) -> Error {
     format!("Error: Exceeded limit of {} jumps!", limit).into()
 }
+
+pub fn label_len_limit() -> Error {
+    "Error: Single label exceeds 63 characters limit".into()
+}
