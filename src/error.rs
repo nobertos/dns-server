@@ -5,6 +5,6 @@ pub fn index_out_of_bound() -> Error {
     "Error: Index out of bound!".into()
 }
 
-pub fn jumps_limit(limit: u32) -> Error {
+pub fn jumps_limit(limit: u8) -> Error {
     format!("Error: Exceeded limit of {} jumps!", limit).into()
 }

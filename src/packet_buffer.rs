@@ -66,31 +66,44 @@ impl PacketBuffer {
         Ok(res)
     }
 
+    fn qname_jump(&mut self, pos: &mut usize, len: u8, num_jumps: &mut u8) -> Result<bool> {
+        let byte = self.get(*pos + 1)? as u16;
+        let offset = (((len as u16) ^ 0xC0) << 8) | byte;
+        *pos = offset as usize;
+        *num_jumps += 1;
+        Ok(true)
+    }
+    fn qname_push(
+        &mut self,
+        outstr: &mut String,
+        delim: &str,
+        pos: &mut usize,
+        len: u8,
+    ) -> Result<()> {
+        outstr.push_str(delim);
+        let str_buf = self.get_range(*pos, len as usize)?;
+        outstr.push_str(&String::from_utf8_lossy(str_buf).to_lowercase());
+
+        *pos += len as usize;
+        Ok(())
+    }
     pub fn read_qname(&mut self, outstr: &mut String) -> Result<()> {
         let mut pos = self.pos();
-
         let mut jumped = false;
-        let mut num_jumps = 0;
-        let max_jumps = 5;
-
+        let mut num_jumps: u8 = 0;
+        let max_jumps: u8 = 5;
         let mut delim = "";
 
         loop {
             if num_jumps > max_jumps {
                 return Err(jumps_limit(max_jumps));
             }
-
             let len = self.get(pos)?;
             if (len & 0xC0) == 0xC0 {
                 if !jumped {
                     self.seek(pos + 2)?;
                 }
-                let byte = self.get(pos + 1)? as u16;
-                let offset = (((len as u16) ^ 0xC0) << 8) | byte;
-                pos = offset as usize;
-                jumped = true;
-                num_jumps += 1;
-
+                jumped = self.qname_jump(&mut pos, len, &mut num_jumps)?;
                 continue;
             }
 
@@ -99,13 +112,8 @@ impl PacketBuffer {
                 break;
             }
 
-            outstr.push_str(delim);
-            let str_buf = self.get_range(pos, len as usize)?;
-            outstr.push_str(&String::from_utf8_lossy(str_buf).to_lowercase());
-
+            self.qname_push(outstr, delim, &mut pos, len)?;
             delim = ".";
-
-            pos += len as usize;
         }
 
         if !jumped {

@@ -32,9 +32,6 @@ impl DnsRecord {
         match qtype {
             QueryType::A => {
                 let raw_addr = buffer.read_u32()?;
-                // TODO:
-                //   - Try to remove the next lines and replace directly
-                //     by Ipv4Addr::new(raw_addr)
                 let addr = Ipv4Addr::new(
                     ((raw_addr >> 24) & 0xFF) as u8,
                     ((raw_addr >> 16) & 0xFF) as u8,
