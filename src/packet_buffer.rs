@@ -163,4 +163,15 @@ impl PacketBuffer {
         }
         self.write(0)
     }
+
+    pub fn set(&mut self, pos: usize, val: u8) -> Result<()> {
+        self.buf[pos] = val;
+        Ok(())
+    }
+
+    pub fn set_u16(&mut self, pos: usize, val: u16) -> Result<()> {
+        self.buf[pos] = ((val >> 8) & 0xFF) as u8;
+        self.buf[pos + 1] = ((val >> 0) & 0xFF) as u8;
+        Ok(())
+    }
 }

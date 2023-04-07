@@ -15,7 +15,7 @@ impl DnsQuestion {
         Self {
             qname,
             qtype,
-            qclass: 0,
+            qclass: 1,
         }
     }
 
@@ -24,5 +24,11 @@ impl DnsQuestion {
         self.qtype = buffer.read_u16()?.into();
         self.qclass = buffer.read_u16()?;
         Ok(())
+    }
+
+    pub fn write(&self, buffer: &mut PacketBuffer) -> Result<()> {
+        buffer.write_qname(&self.qname)?;
+        buffer.write_u16(self.qtype.into())?;
+        buffer.write_u16(self.qclass)
     }
 }
