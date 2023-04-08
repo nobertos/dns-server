@@ -37,12 +37,14 @@ impl Into<u16> for QueryType {
     }
 }
 
+use std::net::Ipv4Addr;
+
 use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 
 use self::dns_header::DnsHeader;
 use self::dns_question::DnsQuestion;
-use self::dns_record::DnsRecord;
+use self::dns_record::{DnsRecord, RecordData};
 
 #[derive(Clone, Debug)]
 pub struct DnsMessage {
@@ -106,18 +108,69 @@ impl DnsMessage {
             qst.write(&mut buffer)?;
         }
 
-        for rec in &self.answers {
+        for rec in &mut self.answers {
             rec.write(&mut buffer)?;
         }
 
-        for rec in &self.authorities {
+        for rec in &mut self.authorities {
             rec.write(&mut buffer)?;
         }
 
-        for rec in &self.resources {
+        for rec in &mut self.resources {
             rec.write(&mut buffer)?;
         }
 
         Ok(buffer)
+    }
+
+    /// Picks a random `DnsRecord` of type `QueryType::A`
+    ///
+    ///     - takes: `&self`
+    ///     - returns: `Option<Ipv4Addr>`
+    pub fn random_ipv4(&self) -> Option<Ipv4Addr> {
+        self.answers.iter().find_map(|rec| match rec.data {
+            RecordData::A { addr } => Some(addr),
+            _ => None,
+        })
+    }
+
+    /// Picks and `Iterator` over all name servers in the
+    /// authorities section
+    ///  
+    ///     - takes: `(&'a self, &'a str)` = (DnsMessage, qname)
+    ///     - returns: `impl Iterator<Item = (&'a str, &'a str)>`
+    ///         which is an iterator over a tuple (domain, hostname)
+    fn iter_ns<'a>(&'a self, qname: &'a str) -> impl Iterator<Item = (&'a str, &'a str)> {
+        self.authorities
+            .iter()
+            .filter_map(|rec| match rec.data {
+                RecordData::NS { ref host } => Some((rec.domain.as_str(), host.as_str())),
+                _ => None,
+            })
+            .filter(move |(domain, _)| qname.ends_with(*domain))
+    }
+
+    /// Picks the `Ipv4Addr`  of a resolved nameservers `RecordData::NS`
+    ///
+    ///     - takes: `(&self, &str)` = (DnsMessage, qname)
+    ///     - returns: `Option<Ipv4Addr>`
+    pub fn get_resolved_ns(&self, qname: &str) -> Option<Ipv4Addr> {
+        self.iter_ns(qname)
+            .flat_map(|(_, host)| {
+                self.resources.iter().filter_map(move |rec| match rec.data {
+                    RecordData::A { addr } if rec.domain == host => Some(addr),
+                    _ => None,
+                })
+            })
+            .map(|addr| addr)
+            .next()
+    }
+
+    /// Picks the unresolved nameserver `RecordData::NS`
+    ///
+    ///    - takes: `(&'a self, &'a str)` = (DnsMessage, qname)
+    ///    - returns: `Option<&'a str>`
+    pub fn get_unresolved_ns<'a>(&'a self, qname: &'a str) -> Option<&'a str> {
+        self.iter_ns(qname).find_map(|(_, host)| Some(host))
     }
 }

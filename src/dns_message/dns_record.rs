@@ -5,7 +5,7 @@ use crate::{errors::Result, packet_buffer::PacketBuffer};
 use super::QueryType;
 
 #[derive(Clone, Debug)]
-enum RecordData {
+pub enum RecordData {
     UNKNOWN,
     A { addr: Ipv4Addr },
     NS { host: String },
@@ -41,12 +41,12 @@ impl RecordData {
 
 #[derive(Clone, Debug)]
 pub struct DnsRecord {
-    domain: String,
+    pub domain: String,
     qtype: QueryType,
     class: u16,
     ttl: u32,
     data_len: u16,
-    data: RecordData,
+    pub data: RecordData,
 }
 impl DnsRecord {
     pub fn new() -> Self {
@@ -60,6 +60,13 @@ impl DnsRecord {
         }
     }
 
+    /// Parse record data `RecordData` based on the `QueryType `
+    /// of the Record `DnsRecord`.
+    ///
+    ///     - takes: `(&mut DnsRecord, &mut PacketBuffer)`
+    ///         and writes the data into DnsRecord.data
+    ///         field.
+    ///     - returns: `Result<()>`
     fn read_data(record: &mut Self, buffer: &mut PacketBuffer) -> Result<()> {
         match record.qtype {
             QueryType::A => {
@@ -100,10 +107,13 @@ impl DnsRecord {
         Ok(())
     }
 
+    /// Parse data from payload `PacketBuffer`
+    ///
+    ///     - takes: `&mut PacketBuffer`
+    ///     - return: `Result<DnsRecord>`
     pub fn read(buffer: &mut PacketBuffer) -> Result<Self> {
         let mut result = Self::new();
         buffer.read_qname(&mut result.domain)?;
-
         result.qtype = buffer.read_u16()?.into();
         result.class = buffer.read_u16()?;
         result.ttl = buffer.read_u32()?;
@@ -112,8 +122,16 @@ impl DnsRecord {
         Ok(result)
     }
 
-    fn write_data(&self, buffer: &mut PacketBuffer) -> Result<()> {
-        buffer.write_u16(self.data_len)?;
+    /// Writes the length of data and the data `RecordData` into buffer,
+    ///
+    ///     - takes: `(&mut self, &mut PacketBuffer)`, first it saves the
+    ///         starting position, and inserts a temporary `0u16` value
+    ///         into buffer, which will be overwritten after writing all
+    ///         the data.
+    ///     - returns: `Result<()>`
+    fn write_data(&mut self, buffer: &mut PacketBuffer) -> Result<()> {
+        let start_pos = buffer.pos();
+        buffer.write_u16(0)?;
         match self.data {
             RecordData::A { addr } => buffer.write_u32(addr.into())?,
             RecordData::NS { ref host } => buffer.write_qname(host)?,
@@ -129,9 +147,19 @@ impl DnsRecord {
             }
             RecordData::UNKNOWN => {}
         }
+        self.data_len = (buffer.pos() - (start_pos + 2)) as u16;
+        buffer.set_u16(start_pos, self.data_len)?;
         Ok(())
     }
-    pub fn write(&self, buffer: &mut PacketBuffer) -> Result<usize> {
+
+    /// Writes `DnsRecord` into `PacketBuffer` buffer
+    ///
+    ///     - takes: `(&mut self, &mut PacketBuffer)`, `&mut self`
+    ///         because we will modify the `DnsRecord.data_len`
+    ///         based on the record data.
+    ///     - returns: `Result<usize>` which is the total size of the
+    ///         `DnsRecord`
+    pub fn write(&mut self, buffer: &mut PacketBuffer) -> Result<usize> {
         let start_pos = buffer.pos();
         buffer.write_qname(&self.domain)?;
         buffer.write_u16(self.qtype.into())?;

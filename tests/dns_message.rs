@@ -4,7 +4,6 @@ use std::{fs::File, net::UdpSocket};
 use cdn_dns::dns_message::dns_question::DnsQuestion;
 use cdn_dns::{
     dns_message::{DnsMessage, QueryType},
-    dns_resolver,
     packet_buffer::PacketBuffer,
 };
 
@@ -41,8 +40,8 @@ fn dns_message_text_test() {
 
 #[test]
 fn dns_message_socket_test() {
-    let qtype = QueryType::CNAME;
-    let qname = "google.com";
+    let qtype = QueryType::MX;
+    let qname = "www.yahoo.com";
     let server = ("8.8.8.8", 53);
     let socket = UdpSocket::bind(("0.0.0.0", 0)).unwrap();
 
