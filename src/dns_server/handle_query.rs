@@ -1,10 +1,8 @@
-use std::net::Ipv4Addr;
-
 use tokio::net::UdpSocket;
 
 use crate::dns_message::dns_header::ResultCode;
 use crate::dns_message::DnsMessage;
-use crate::dns_server::lookup::{lookup, recursive_lookup};
+use crate::dns_server::lookup::recursive_lookup;
 use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 
@@ -24,8 +22,7 @@ pub async fn handle_query(socket: &UdpSocket) -> Result<()> {
 
     if let Some(question) = request.questions.pop() {
         println!("Received query: {:#?}", question);
-        let server = ("8.8.8.8".parse::<Ipv4Addr>().unwrap(), 53);
-        if let Ok(result) = lookup(&question.qname, question.qtype, server).await {
+        if let Ok(result) = recursive_lookup(&question.qname, question.qtype).await {
             message.questions.push(question);
             message.header.rescode = result.header.rescode;
             message.answers = result.answers;

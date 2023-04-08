@@ -36,7 +36,7 @@ pub fn recursive_lookup<'a>(
     qtype: QueryType,
 ) -> Pin<Box<dyn Future<Output = std::result::Result<DnsMessage, ()>> + Send + 'a>> {
     Box::pin(async move {
-        let mut ns = "8.8.8.8".parse::<Ipv4Addr>().unwrap();
+        let mut ns = "198.41.0.4".parse::<Ipv4Addr>().unwrap();
 
         loop {
             println!("attempting lookup of {:?} {} with ns {}", qtype, qname, ns);
