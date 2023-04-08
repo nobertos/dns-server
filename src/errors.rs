@@ -12,3 +12,11 @@ pub fn jumps_limit(limit: u8) -> Error {
 pub fn label_len_limit() -> Error {
     "Error: Single label exceeds 63 characters limit".into()
 }
+
+pub fn failed_json_parse<'a>() -> &'a str {
+    "Failed to parse JSON string"
+}
+
+pub fn failed_path_read(path: &str) -> String {
+    format!("Failed to read from {}", path)
+}
