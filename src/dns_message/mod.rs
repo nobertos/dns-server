@@ -125,8 +125,9 @@ impl DnsMessage {
 
     /// Picks a random `DnsRecord` of type `QueryType::A`
     ///
-    ///     - takes: `&self`
-    ///     - returns: `Option<Ipv4Addr>`
+    /// takes: `&self`
+    ///
+    /// returns: `Option<Ipv4Addr>`
     pub fn random_ipv4(&self) -> Option<Ipv4Addr> {
         self.answers.iter().find_map(|rec| match rec.data {
             RecordData::A { addr } => Some(addr),
@@ -136,10 +137,11 @@ impl DnsMessage {
 
     /// Picks and `Iterator` over all name servers in the
     /// authorities section
-    ///  
-    ///     - takes: `(&'a self, &'a str)` = (DnsMessage, qname)
-    ///     - returns: `impl Iterator<Item = (&'a str, &'a str)>`
-    ///         which is an iterator over a tuple (domain, hostname)
+    ///
+    /// takes: `(&'a self, &'a str)` = (DnsMessage, qname)
+    ///
+    /// returns: `impl Iterator<Item = (&'a str, &'a str)>`
+    /// which is an iterator over a tuple (domain, hostname)
     fn iter_ns<'a>(&'a self, qname: &'a str) -> impl Iterator<Item = (&'a str, &'a str)> {
         self.authorities
             .iter()
@@ -152,8 +154,9 @@ impl DnsMessage {
 
     /// Picks the `Ipv4Addr`  of a resolved nameservers `RecordData::NS`
     ///
-    ///     - takes: `(&self, &str)` = (DnsMessage, qname)
-    ///     - returns: `Option<Ipv4Addr>`
+    /// takes: `(&self, &str)` = (DnsMessage, qname)
+    ///
+    /// returns: `Option<Ipv4Addr>`
     pub fn get_resolved_ns(&self, qname: &str) -> Option<Ipv4Addr> {
         self.iter_ns(qname)
             .flat_map(|(_, host)| {
@@ -168,8 +171,8 @@ impl DnsMessage {
 
     /// Picks the unresolved nameserver `RecordData::NS`
     ///
-    ///    - takes: `(&'a self, &'a str)` = (DnsMessage, qname)
-    ///    - returns: `Option<&'a str>`
+    /// takes: `(&'a self, &'a str)` = (DnsMessage, qname)
+    /// returns: `Option<&'a str>`
     pub fn get_unresolved_ns<'a>(&'a self, qname: &'a str) -> Option<&'a str> {
         self.iter_ns(qname).find_map(|(_, host)| Some(host))
     }

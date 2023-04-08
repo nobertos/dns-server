@@ -1,3 +1,4 @@
+pub mod config;
 pub mod dns_message;
 pub mod dns_server;
 pub mod errors;

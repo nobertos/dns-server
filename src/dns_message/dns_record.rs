@@ -63,10 +63,11 @@ impl DnsRecord {
     /// Parse record data `RecordData` based on the `QueryType`
     /// of the Record `DnsRecord`.
     ///
-    ///     - takes "(&mut DnsRecord, &mut PacketBuffer)"
-    ///         and writes the data into DnsRecord.data
-    ///         field.
-    ///     - returns "Result<()>"
+    /// takes `(&mut DnsRecord, &mut PacketBuffer)`
+    /// and writes the data into DnsRecord.data
+    /// field.
+    ///         
+    /// returns `Result<()>`
     fn read_data(record: &mut Self, buffer: &mut PacketBuffer) -> Result<()> {
         match record.qtype {
             QueryType::A => {
@@ -109,8 +110,9 @@ impl DnsRecord {
 
     /// Parse data from payload `PacketBuffer`
     ///
-    ///     - takes "&mut PacketBuffer"
-    ///     - returns "Result<DnsRecord>"
+    /// takes `&mut PacketBuffer`
+    ///
+    /// returns `Result<DnsRecord>`
     pub fn read(buffer: &mut PacketBuffer) -> Result<Self> {
         let mut result = Self::new();
         buffer.read_qname(&mut result.domain)?;
@@ -124,11 +126,12 @@ impl DnsRecord {
 
     /// Writes the length of data and the data `RecordData` into buffer,
     ///
-    ///     - takes "(&mut self, &mut PacketBuffer)", first it saves the
-    ///         starting position, and inserts a temporary "0u16" value
-    ///         into buffer, which will be overwritten after writing all
-    ///         the data.
-    ///     - returns "Result<()>"
+    /// takes `(&mut self, &mut PacketBuffer)`, first it saves the
+    /// starting position, and inserts a temporary `0u16` value
+    /// into buffer, which will be overwritten after writing all
+    /// the data.
+    ///
+    /// returns `Result<()>`.
     fn write_data(&mut self, buffer: &mut PacketBuffer) -> Result<()> {
         let start_pos = buffer.pos();
         buffer.write_u16(0)?;
@@ -154,11 +157,12 @@ impl DnsRecord {
 
     /// Writes `DnsRecord` into `PacketBuffer` buffer
     ///
-    ///     - takes "(&mut self, &mut PacketBuffer)", "&mut self"
-    ///         because we will modify the "DnsRecord.data_len"
-    ///         based on the record data.
-    ///     - returns "Result<usize>" which is the total size of the
-    ///         "DnsRecord"
+    /// takes `(&mut self, &mut PacketBuffer)`, `&mut self`
+    /// because we will modify the `DnsRecord.data_len`
+    /// based on the record data.
+    ///
+    /// returns `Result<usize>` which is the total size of the
+    /// `DnsRecord`.
     pub fn write(&mut self, buffer: &mut PacketBuffer) -> Result<usize> {
         let start_pos = buffer.pos();
         buffer.write_qname(&self.domain)?;

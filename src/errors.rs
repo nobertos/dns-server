@@ -20,3 +20,18 @@ pub fn failed_json_parse<'a>() -> &'a str {
 pub fn failed_path_read(path: &str) -> String {
     format!("Failed to read from {}", path)
 }
+
+pub fn failed_env_parse(value: &str) -> String {
+    format!(
+        "{} is not a supported environment. User either `local` or `production`.",
+        value
+    )
+}
+
+pub fn failed_config_read<'a>() -> &'a str {
+    "Failed to read configuration."
+}
+
+pub fn failed_socket_bind<'a>() -> &'a str {
+    "Failed to bind socket address to `UdpSocket`"
+}

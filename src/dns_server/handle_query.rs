@@ -1,16 +1,18 @@
-use std::net::UdpSocket;
+use std::net::Ipv4Addr;
+
+use tokio::net::UdpSocket;
 
 use crate::dns_message::dns_header::ResultCode;
 use crate::dns_message::DnsMessage;
-use crate::dns_server::lookup::recursive_lookup;
+use crate::dns_server::lookup::{lookup, recursive_lookup};
 use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 
 /// Handle a single incoming packet
-pub fn handle_query(socket: &UdpSocket) -> Result<()> {
+pub async fn handle_query(socket: &UdpSocket) -> Result<()> {
     let mut recv_buffer = PacketBuffer::new();
 
-    let (_, src) = socket.recv_from(&mut recv_buffer.buf)?;
+    let (_, src) = socket.recv_from(&mut recv_buffer.buf).await?;
 
     let mut request = DnsMessage::from_buf(&mut recv_buffer)?;
 
@@ -22,7 +24,8 @@ pub fn handle_query(socket: &UdpSocket) -> Result<()> {
 
     if let Some(question) = request.questions.pop() {
         println!("Received query: {:#?}", question);
-        if let Ok(result) = recursive_lookup(&question.qname, question.qtype) {
+        let server = ("8.8.8.8".parse::<Ipv4Addr>().unwrap(), 53);
+        if let Ok(result) = lookup(&question.qname, question.qtype, server).await {
             message.questions.push(question);
             message.header.rescode = result.header.rescode;
             message.answers = result.answers;
@@ -39,7 +42,7 @@ pub fn handle_query(socket: &UdpSocket) -> Result<()> {
 
     let len = send_buffer.pos();
     let data = send_buffer.get_range(0, len)?;
-    socket.send_to(data, src)?;
+    socket.send_to(data, src).await?;
 
     Ok(())
 }
