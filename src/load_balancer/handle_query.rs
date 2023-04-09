@@ -9,7 +9,7 @@ use crate::packet_buffer::PacketBuffer;
 
 use super::connection::ConnectionList;
 
-pub async fn handle_query(socket: &UdpSocket, config: CdnSettings) -> Result<()> {
+pub async fn handle_query(socket: &UdpSocket, config: &CdnSettings) -> Result<()> {
     let mut recv_buffer = PacketBuffer::new();
 
     let (_, src) = socket.recv_from(&mut recv_buffer.buf).await?;
@@ -52,6 +52,7 @@ fn construct_record(src: &str, message: &mut DnsMessage, config: &CdnSettings) {
     let connections = ConnectionList::read_connections(&config.connections_path);
     let addr = match connections
         .iter_servers(src.split(":").next().unwrap())
+        .filter(|server| up_servers.contains(&server.to_string()))
         .next()
     {
         Some(addr) => addr,

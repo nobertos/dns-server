@@ -14,7 +14,9 @@ async fn main() {
         .await
         .expect(failed_socket_bind());
     if config.application.is_load_balancer {
-        load_balancer(&socket, config.cdn).await.unwrap();
+        loop {
+            load_balancer(&socket, &config.cdn).await.unwrap();
+        }
     } else {
         resolver(&socket).await.unwrap();
     }
