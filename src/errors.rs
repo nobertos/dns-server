@@ -39,3 +39,7 @@ pub fn failed_socket_bind<'a>() -> &'a str {
 pub fn failed_cdn_down<'a>() -> &'a str {
     "The CDN is currently down, Try again later!"
 }
+
+pub fn failed_current_dir<'a>() -> &'a str {
+    "Failed to determine the current directory"
+}

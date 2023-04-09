@@ -1,6 +1,6 @@
 use config::{Config, ConfigError, File};
 
-use crate::errors::failed_env_parse;
+use crate::errors::{failed_current_dir, failed_env_parse};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Settings {
@@ -10,6 +10,7 @@ pub struct Settings {
 
 #[derive(Debug, serde::Deserialize)]
 pub struct ApplicationSettings {
+    pub is_load_balancer: bool,
     pub port: u16,
     pub host: String,
 }
@@ -47,8 +48,7 @@ impl TryFrom<String> for Environment {
 }
 
 pub fn get_config() -> Result<Settings, ConfigError> {
-    let base_path = std::env::current_dir().expect("Failed to determine th?e current directory");
-    println!("base_path: {:?}\n\n\n", base_path);
+    let base_path = std::env::current_dir().expect(failed_current_dir());
     let config_dir = base_path.join("config");
 
     let environment: Environment = std::env::var("APP_ENV")
