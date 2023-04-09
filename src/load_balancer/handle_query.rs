@@ -50,7 +50,10 @@ fn construct_record(src: &str, message: &mut DnsMessage, config: &CdnSettings) {
     let up_servers = &config.up_servers;
     let hostname = &config.hostname;
     let connections = ConnectionList::read_connections(&config.connections_path);
-    let addr = match connections.iter_servers(src).next() {
+    let addr = match connections
+        .iter_servers(src.split(":").next().unwrap())
+        .next()
+    {
         Some(addr) => addr,
         None => up_servers.first().expect(failed_cdn_down()),
     };
