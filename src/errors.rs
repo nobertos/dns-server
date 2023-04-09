@@ -35,3 +35,7 @@ pub fn failed_config_read<'a>() -> &'a str {
 pub fn failed_socket_bind<'a>() -> &'a str {
     "Failed to bind socket address to `UdpSocket`"
 }
+
+pub fn failed_cdn_down<'a>() -> &'a str {
+    "The CDN is currently down, Try again later!"
+}

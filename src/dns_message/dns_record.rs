@@ -17,12 +17,18 @@ impl RecordData {
     fn new() -> Self {
         Self::UNKNOWN
     }
-    fn read_ipv4(raw_addr: u32) -> RecordData {
+    fn new_a(addr: &str) -> Self {
+        Self::A {
+            addr: addr.parse::<Ipv4Addr>().unwrap(),
+        }
+    }
+
+    fn read_a(raw_addr: u32) -> RecordData {
         RecordData::A {
             addr: Ipv4Addr::from(raw_addr),
         }
     }
-    fn read_ipv6(raw_addr: [u16; 8]) -> RecordData {
+    fn read_aaaa(raw_addr: [u16; 8]) -> RecordData {
         RecordData::AAAA {
             addr: Ipv6Addr::from(raw_addr),
         }
@@ -52,11 +58,22 @@ impl DnsRecord {
     pub fn new() -> Self {
         Self {
             domain: String::new(),
-            qtype: 0.into(),
+            qtype: QueryType::UNKNOWN(0),
             class: 1,
             ttl: 0,
             data_len: 0,
             data: RecordData::new(),
+        }
+    }
+
+    pub fn new_a(addr: &str, hostname: &str) -> Self {
+        Self {
+            domain: hostname.into(),
+            qtype: QueryType::A,
+            class: 1,
+            ttl: 100,
+            data_len: 4,
+            data: RecordData::new_a(addr),
         }
     }
 
@@ -72,7 +89,7 @@ impl DnsRecord {
         match record.qtype {
             QueryType::A => {
                 let raw_addr = buffer.read_u32()?;
-                record.data = RecordData::read_ipv4(raw_addr);
+                record.data = RecordData::read_a(raw_addr);
             }
 
             QueryType::NS => {
@@ -99,7 +116,7 @@ impl DnsRecord {
                 for hextet in raw_addr.iter_mut() {
                     *hextet = buffer.read_u16()?;
                 }
-                record.data = RecordData::read_ipv6(raw_addr)
+                record.data = RecordData::read_aaaa(raw_addr)
             }
             QueryType::UNKNOWN(_) => {
                 buffer.advance(record.data_len as usize)?;

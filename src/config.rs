@@ -5,13 +5,19 @@ use crate::errors::failed_env_parse;
 #[derive(Debug, serde::Deserialize)]
 pub struct Settings {
     pub application: ApplicationSettings,
-    pub servers: Vec<String>,
+    pub cdn: CdnSettings,
 }
 
 #[derive(Debug, serde::Deserialize)]
 pub struct ApplicationSettings {
     pub port: u16,
     pub host: String,
+}
+#[derive(Debug, serde::Deserialize)]
+pub struct CdnSettings {
+    pub hostname: String,
+    pub connections_path: String,
+    pub up_servers: Vec<String>,
 }
 
 pub enum Environment {
@@ -41,7 +47,8 @@ impl TryFrom<String> for Environment {
 }
 
 pub fn get_config() -> Result<Settings, ConfigError> {
-    let base_path = std::env::current_dir().expect("Failed to determine the current directory");
+    let base_path = std::env::current_dir().expect("Failed to determine th?e current directory");
+    println!("base_path: {:?}\n\n\n", base_path);
     let config_dir = base_path.join("config");
 
     let environment: Environment = std::env::var("APP_ENV")

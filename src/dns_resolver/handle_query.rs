@@ -2,7 +2,7 @@ use tokio::net::UdpSocket;
 
 use crate::dns_message::dns_header::ResultCode;
 use crate::dns_message::DnsMessage;
-use crate::dns_server::lookup::recursive_lookup;
+use crate::dns_resolver::lookup::recursive_lookup;
 use crate::errors::Result;
 use crate::packet_buffer::PacketBuffer;
 

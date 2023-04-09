@@ -34,8 +34,9 @@ pub async fn lookup(qname: &str, qtype: QueryType, server: (Ipv4Addr, u16)) -> R
 pub fn recursive_lookup<'a>(
     qname: &'a str,
     qtype: QueryType,
-) -> Pin<Box<dyn Future<Output = std::result::Result<DnsMessage, ()>> + Send + 'a>> {
+) -> Pin<Box<dyn Future<Output = Result<DnsMessage>> + Send + 'a>> {
     Box::pin(async move {
+        // this name server is one of the 13 root servers.
         let mut ns = "198.41.0.4".parse::<Ipv4Addr>().unwrap();
 
         loop {
