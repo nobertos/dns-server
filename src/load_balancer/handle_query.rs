@@ -1,11 +1,11 @@
 use tokio::net::UdpSocket;
 
-use crate::config::CdnSettings;
 use crate::dns_message::dns_header::ResultCode;
 use crate::dns_message::dns_record::DnsRecord;
 use crate::dns_message::packet_buffer::PacketBuffer;
 use crate::dns_message::DnsMessage;
 use crate::errors::{failed_cdn_down, Result};
+use crate::settings::config::CdnSettings;
 
 use super::connection::ConnectionList;
 
@@ -48,7 +48,7 @@ pub async fn handle_query(socket: &UdpSocket, config: &mut CdnSettings) -> Resul
 }
 
 fn construct_record(src: &str, message: &mut DnsMessage, config: &CdnSettings) {
-    let up_servers = &config.up_servers;
+    let up_servers = &config.servers;
     let hostname = &config.hostname;
     let connections = ConnectionList::read_connections(&config.connections_path);
     let addr = match connections

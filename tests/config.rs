@@ -1,4 +1,5 @@
-use cdn_dns::{config::get_config, errors::failed_config_read};
+use cdn_dns::errors::failed_config_read;
+use cdn_dns::settings::config::get_config;
 
 #[test]
 fn config_test() {

@@ -43,3 +43,7 @@ pub fn failed_cdn_down<'a>() -> &'a str {
 pub fn failed_current_dir<'a>() -> &'a str {
     "Failed to determine the current directory"
 }
+
+pub fn failed_request_execution<'a>() -> &'a str {
+    "Failed to execute request"
+}

@@ -1,6 +1,9 @@
 use config::{Config, ConfigError, File};
 
-use crate::errors::{failed_current_dir, failed_env_parse};
+use crate::{
+    errors::{failed_current_dir, failed_env_parse},
+    settings::Request,
+};
 
 #[derive(Debug, serde::Deserialize)]
 pub struct Settings {
@@ -18,14 +21,26 @@ pub struct ApplicationSettings {
 pub struct CdnSettings {
     pub hostname: String,
     pub connections_path: String,
-    pub up_servers: Vec<String>,
+    pub port: u16,
+    pub servers: Vec<String>,
 }
 impl CdnSettings {
     // TODO: i need to program it so that it pings the servers
     //  and update it based on those who are up
     pub fn check_up_servers(&mut self) {
         let settings = get_config().unwrap();
-        self.up_servers = settings.cdn.up_servers;
+        self.servers = settings.cdn.servers;
+    }
+    pub async fn health_check(&self) -> Vec<&str> {
+        let mut up_servers = vec![];
+        let mut req = Request::new(self.port);
+        for server in &self.servers {
+            req.set_addr(&server);
+            if super::health_check::check(&req).await {
+                up_servers.push(server.as_str());
+            }
+        }
+        up_servers
     }
 }
 

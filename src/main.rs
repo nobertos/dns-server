@@ -1,5 +1,5 @@
-use cdn_dns::config::get_config;
 use cdn_dns::errors::{failed_config_read, failed_socket_bind};
+use cdn_dns::settings::config::get_config;
 
 use cdn_dns::dns_resolver::handle_query::handle_query as resolver;
 use cdn_dns::load_balancer::handle_query::handle_query as load_balancer;

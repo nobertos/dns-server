@@ -3,7 +3,8 @@ application:
 cdn:
   hostname: "cdn.esi.dz"
   connections_path: "connections.json"
-  up_servers:
+  port: 80
+  servers:
     - 172.16.1.2
     - 172.16.2.2
     - 172.16.3.2
