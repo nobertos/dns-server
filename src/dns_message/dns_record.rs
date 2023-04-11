@@ -1,6 +1,7 @@
+use crate::dns_message::packet_buffer::PacketBuffer;
 use std::net::{Ipv4Addr, Ipv6Addr};
 
-use crate::{errors::Result, packet_buffer::PacketBuffer};
+use crate::errors::Result;
 
 use super::QueryType;
 

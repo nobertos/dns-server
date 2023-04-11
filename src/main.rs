@@ -7,7 +7,7 @@ use tokio::net::UdpSocket;
 
 #[tokio::main]
 async fn main() {
-    let config = get_config().expect(failed_config_read());
+    let mut config = get_config().expect(failed_config_read());
 
     let socket_addr = format!("{}:{}", config.application.host, config.application.port);
     let socket = UdpSocket::bind(socket_addr)
@@ -15,7 +15,7 @@ async fn main() {
         .expect(failed_socket_bind());
     if config.application.is_load_balancer {
         loop {
-            load_balancer(&socket, &config.cdn).await.unwrap();
+            load_balancer(&socket, &mut config.cdn).await.unwrap();
         }
     } else {
         resolver(&socket).await.unwrap();

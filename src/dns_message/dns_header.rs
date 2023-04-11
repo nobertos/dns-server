@@ -1,5 +1,5 @@
+use crate::dns_message::packet_buffer::PacketBuffer;
 use crate::errors::Result;
-use crate::packet_buffer::PacketBuffer;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum ResultCode {

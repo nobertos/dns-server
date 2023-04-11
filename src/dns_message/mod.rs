@@ -1,6 +1,7 @@
 pub mod dns_header;
 pub mod dns_question;
 pub mod dns_record;
+pub mod packet_buffer;
 
 #[derive(PartialEq, Eq, Debug, Clone, Hash, Copy)]
 pub enum QueryType {
@@ -39,8 +40,8 @@ impl Into<u16> for QueryType {
 
 use std::net::Ipv4Addr;
 
+use crate::dns_message::packet_buffer::PacketBuffer;
 use crate::errors::Result;
-use crate::packet_buffer::PacketBuffer;
 
 use self::dns_header::DnsHeader;
 use self::dns_question::DnsQuestion;
@@ -79,7 +80,7 @@ impl DnsMessage {
 
         for _ in 0..header.answers {
             let rec = DnsRecord::read(buffer)?;
-            result.resources.push(rec);
+            result.answers.push(rec);
         }
 
         for _ in 0..header.authoritative_entries {

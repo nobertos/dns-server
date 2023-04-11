@@ -20,6 +20,14 @@ pub struct CdnSettings {
     pub connections_path: String,
     pub up_servers: Vec<String>,
 }
+impl CdnSettings {
+    // TODO: i need to program it so that it pings the servers
+    //  and update it based on those who are up
+    pub fn check_up_servers(&mut self) {
+        let settings = get_config().unwrap();
+        self.up_servers = settings.cdn.up_servers;
+    }
+}
 
 pub enum Environment {
     Local,

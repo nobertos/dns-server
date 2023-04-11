@@ -3,17 +3,18 @@ use tokio::net::UdpSocket;
 use crate::config::CdnSettings;
 use crate::dns_message::dns_header::ResultCode;
 use crate::dns_message::dns_record::DnsRecord;
+use crate::dns_message::packet_buffer::PacketBuffer;
 use crate::dns_message::DnsMessage;
 use crate::errors::{failed_cdn_down, Result};
-use crate::packet_buffer::PacketBuffer;
 
 use super::connection::ConnectionList;
 
-pub async fn handle_query(socket: &UdpSocket, config: &CdnSettings) -> Result<()> {
+pub async fn handle_query(socket: &UdpSocket, config: &mut CdnSettings) -> Result<()> {
     let mut recv_buffer = PacketBuffer::new();
 
     let (_, src) = socket.recv_from(&mut recv_buffer.buf).await?;
     let src = src.to_string();
+    config.check_up_servers();
 
     let mut request = DnsMessage::from_buf(&mut recv_buffer)?;
 

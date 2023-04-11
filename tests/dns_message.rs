@@ -2,10 +2,8 @@ use std::io::Read;
 use std::{fs::File, net::UdpSocket};
 
 use cdn_dns::dns_message::dns_question::DnsQuestion;
-use cdn_dns::{
-    dns_message::{DnsMessage, QueryType},
-    packet_buffer::PacketBuffer,
-};
+use cdn_dns::dns_message::packet_buffer::PacketBuffer;
+use cdn_dns::dns_message::{DnsMessage, QueryType};
 
 #[test]
 fn dns_message_text_test() {

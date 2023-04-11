@@ -1,8 +1,8 @@
 use crate::dns_message::dns_header::ResultCode;
 use crate::dns_message::dns_question::DnsQuestion;
+use crate::dns_message::packet_buffer::PacketBuffer;
 use crate::dns_message::{DnsMessage, QueryType};
 use crate::errors::Result;
-use crate::packet_buffer::PacketBuffer;
 use std::future::Future;
 use std::net::Ipv4Addr;
 use std::pin::Pin;
@@ -44,6 +44,7 @@ pub fn recursive_lookup<'a>(
 
             let server = (ns, 53);
             let response = lookup(qname, qtype, server).await.unwrap();
+            println!("{:#?}", response);
 
             if !response.answers.is_empty() && response.header.rescode == ResultCode::NOERROR {
                 return Ok(response);
