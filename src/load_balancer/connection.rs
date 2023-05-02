@@ -10,6 +10,8 @@ struct Connection {
     server: String,
 }
 
+// TODO: MOVE ConnectionList INTO
+//       ConnectionMap SO USE A HashMap
 pub struct ConnectionList {
     connections: Vec<Connection>,
 }
